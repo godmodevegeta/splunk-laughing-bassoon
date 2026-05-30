@@ -1,0 +1,22 @@
+[
+    {
+        "data_model": "Authentication",
+        "description": "Used to track user login and authentication events.",
+        "fields": [
+            {"cim_field": "user", "description": "The name of the user being authenticated."},
+            {"cim_field": "src_ip", "description": "The IPv4 or IPv6 address of the client initiating the authentication."},
+            {"cim_field": "action", "description": "The outcome of the authentication event, such as success or failure."},
+            {"cim_field": "app", "description": "The application involved in the authentication event."}
+        ]
+    },
+    {
+        "data_model": "Network Traffic",
+        "description": "Used to track network communication between devices.",
+        "fields": [
+            {"cim_field": "src_ip", "description": "The source IP address of the network connection."},
+            {"cim_field": "dest_ip", "description": "The destination IP address of the network connection."},
+            {"cim_field": "dest_port", "description": "The destination port of the network connection."},
+            {"cim_field": "bytes_in", "description": "Number of bytes received by the destination."}
+        ]
+    }
+]
