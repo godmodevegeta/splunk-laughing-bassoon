@@ -41,14 +41,41 @@ except Exception as e:
 # --- UI CONFIGURATION & CSS ---
 st.markdown("""
     <style>
-    .stApp { background-color: #0F0F0F; color: #E0E0E0; font-family: 'Courier New', Courier, monospace; }
-    h1, h2, h3 { color: #E60073 !important; font-weight: 700; font-family: 'Helvetica Neue', sans-serif; }
-    #MainMenu, footer, header {visibility: hidden;}
-    .stButton>button { background-color: #E60073; color: white; border: none; border-radius: 2px; padding: 0.5rem 2rem; font-weight: bold; text-transform: uppercase; transition: all 0.2s; }
-    .stButton>button:hover { background-color: #FF0080; color: white; }
-    .terminal-box { background-color: #1A1A1A; border-left: 4px solid #E60073; padding: 15px; border-radius: 4px; font-family: monospace; color: #00FF00; margin-bottom: 20px; }
-    .fail-box { border-left-color: #FF3333; color: #FF3333; }
-    .success-box { border-left-color: #00CC66; color: #00CC66; }
+    .stApp { 
+        background-color: #1A1A1A; 
+        color: #FFFFFF; 
+        font-family: 'Splunk Platform Mono', 'Courier New', monospace; 
+    }
+    h1, h2, h3 { 
+        color: #65A637 !important;  /* Splunk Green */
+        font-weight: 600; 
+        font-family: 'Splunk Platform Sans', 'Helvetica Neue', sans-serif; 
+    }
+    .stButton>button { 
+        background-color: #65A637;   /* Splunk Green */
+        color: #1A1A1A;              /* Dark text on green */
+        border: none; 
+        border-radius: 4px;
+        padding: 0.5rem 2rem; 
+        font-weight: 600; 
+        text-transform: uppercase;
+        transition: all 0.2s;
+    }
+    .stButton>button:hover { 
+        background-color: #7BC452;   /* Lighter green */
+        color: #1A1A1A;
+    }
+    .terminal-box { 
+        background-color: #2B2B2B; 
+        border-left: 4px solid #1E93AE;  /* Splunk Teal */
+        padding: 15px; 
+        border-radius: 4px; 
+        font-family: 'Splunk Platform Mono', monospace; 
+        color: #A9A9A9;
+        margin-bottom: 20px; 
+    }
+    .fail-box { border-left-color: #F44336; color: #F44336; }
+    .success-box { border-left-color: #65A637; color: #65A637; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -74,7 +101,7 @@ for i, m in enumerate(modes):
     progress_html += f"<span style='color: {color}; font-weight: {weight};'>{'●' if i <= current_idx else '○'} {m}</span>"
 progress_html += "</div>"
 
-st.markdown(f"### ⚡ TALON v1.0 <span style='float:right; font-size: 14px; color:#00CC66;'>[Sandbox: ● Online]</span>", unsafe_allow_html=True)
+st.markdown(f"### TALON v1.0 <span style='float:right; font-size: 14px; color:#00CC66;'>[Sandbox: ● Online]</span>", unsafe_allow_html=True)
 st.markdown(progress_html, unsafe_allow_html=True)
 
 # ==========================================
@@ -84,12 +111,12 @@ if st.session_state.mode == 'DROP':
     st.markdown("## DROP THE CHAOS")
     
     col1, col2, _ = st.columns(3)
-    if col1.button("🔥 The Java Stacktrace"):
+    if col1.button("The Java Stacktrace"):
         st.session_state.raw_log = "2026-05-31 10:00:01 ERROR [main] App - Crash\njava.lang.NullPointerException\n\tat com.app.Main.run(Main.java:14)"
         st.session_state.mode = 'ITERATE'
         st.session_state.forge_start_time = time.time()
         st.rerun()
-    if col2.button("🧱 Custom Firewall (IP:)"):
+    if col2.button("Custom Firewall (IP:)"):
         st.session_state.raw_log = "2026-05-31 11:50:00 user=jdoe action=login client_address:192.168.1.50"
         st.session_state.mode = 'ITERATE'
         st.session_state.forge_start_time = time.time()
@@ -97,7 +124,7 @@ if st.session_state.mode == 'DROP':
         
     st.session_state.raw_log = st.text_area("Or Paste Raw Log Sample:", height=150, value=st.session_state.raw_log)
     
-    if st.button("🚀 FORGE THIS LOG") and st.session_state.raw_log:
+    if st.button("FORGE THIS LOG") and st.session_state.raw_log:
         st.session_state.mode = 'ITERATE'
         st.session_state.forge_start_time = time.time()
         st.rerun()
@@ -271,7 +298,7 @@ elif st.session_state.mode == 'PACKAGE':
             mime="application/gzip"
         )
     with col2:
-        with st.expander("🚀 DEPLOY TO SPLUNK INSTANCE"):
+        with st.expander("DEPLOY TO SPLUNK INSTANCE"):
             st.info("Direct push via REST API. Enter target Splunk credentials.")
             deploy_host = st.text_input("Host", value="localhost")
             deploy_user = st.text_input("Username", value="admin")
