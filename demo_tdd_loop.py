@@ -35,20 +35,23 @@ if __name__ == "__main__":
         print(f"\n" + "-"*40)
         print(f"🔄 ITERATION {attempt}")
         print("-"*40)
+                
+        # Point 3 Fix: Mutate the stanza name per attempt to prevent Splunk from merging keys
+        current_stanza = f"{stanza_name}_run_{attempt}"
         
         # A. Agent Generates Config via AI
         props_config = agent.generate_config(raw_log, attempt, feedback)
         print(f"🤖 [Agent] Proposed Config: {props_config}")
         
-        # B. Push Config & Reload
-        print("⚙️  [System] Pushing props.conf to Splunk & reloading parsing engine...")
-        client.set_props_config(stanza_name, props_config)
+        # B. Push Config & Reload (using current_stanza)
+        print(f"⚙️  [System] Pushing props.conf [{current_stanza}] to Splunk...")
+        client.set_props_config(current_stanza, props_config)
         client.reload_parsing_configs()
         
-        # C. Ingest Log 
+        # C. Ingest Log (using current_stanza)
         iteration_source = f"schemaops_demo/run_{int(time.time())}.log"
         print(f"📥 [System] Ingesting test log as source={iteration_source}...")
-        client.ingest_logs(raw_log, stanza_name, iteration_source, index="main")
+        client.ingest_logs(raw_log, current_stanza, iteration_source, index="main")
         
         # D. Validate via MCP
         print("🔬 [System] Validating extraction via Splunk MCP Server...")

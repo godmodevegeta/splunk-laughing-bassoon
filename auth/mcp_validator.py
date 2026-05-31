@@ -3,8 +3,10 @@ import json
 import time
 import requests
 import urllib3
+import logging
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+logger = logging.getLogger(__name__)
 
 class SplunkMCPValidator:
     """
@@ -72,7 +74,7 @@ class SplunkMCPValidator:
         # FIX: Added earliest=0 latest=+1d to catch timezone-skewed logs!
         spl = f"index={index} source={source} earliest=0 latest=+1d | fieldsummary"
         
-        print(f"⏳ Waiting for data to index (Polling up to {max_retries * sleep_seconds}s via JSON-RPC MCP)...")
+        logger.info(f"⏳ Waiting for data to index (Polling up to {max_retries * sleep_seconds}s via JSON-RPC MCP)...")
         
         for attempt in range(1, max_retries + 1):
             time.sleep(sleep_seconds)
@@ -80,11 +82,11 @@ class SplunkMCPValidator:
             try:
                 results = self.execute_splunk_run_query(spl)
             except Exception as e:
-                print(f"  [Attempt {attempt}/{max_retries}] MCP call failed: {e}")
+                logger.warning(f"  [Attempt {attempt}/{max_retries}] MCP call failed: {e}")
                 continue
                 
             if not results:
-                print(f"  [Attempt {attempt}/{max_retries}] No data found yet. Retrying...")
+                logger.debug(f"  [Attempt {attempt}/{max_retries}] No data found yet. Retrying...")
                 continue
             
             extracted_fields = [r.get("field") for r in results if isinstance(r, dict)]
@@ -94,9 +96,13 @@ class SplunkMCPValidator:
             missing_fields = [f for f in expected_fields if f not in extracted_fields]
             
             if not missing_fields:
+                logger.info(f"✅ Validation Success: All expected fields found.")
                 return True, "All fields extracted successfully."
             elif attempt == max_retries:
                 # Debug print on the very last attempt so we can see what Splunk ACTUALLY extracted
+                logger.error(f"❌ Validation Failed: Missing {missing_fields}. Found {extracted_fields}")
                 return False, f"Missing fields: {missing_fields}. \n  Actually Found: {extracted_fields}"
+            else:
+                logger.debug(f"[Attempt {attempt}/{max_retries}] Found data, but missing fields. Retrying...")
                 
         return False, f"Timeout. Data never appeared for source={source}."

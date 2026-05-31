@@ -2,6 +2,9 @@
 import json
 import chromadb
 from chromadb.utils import embedding_functions
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CIMOracle:
     def __init__(self, json_path="rag/cim_subset.json", db_path="./chroma_db"):
@@ -27,7 +30,7 @@ class CIMOracle:
 
     def _load_data(self):
         """Reads the CIM JSON and populates the vector database."""
-        print("📚 Loading Splunk CIM schemas into Vector DB...")
+        logger.info("📚 Loading Splunk CIM schemas into Vector DB...")
         with open(self.json_path, "r") as f:
             cim_data = json.load(f)
 
@@ -58,20 +61,26 @@ class CIMOracle:
             metadatas=metadatas,
             ids=ids
         )
-        print(f"✅ Loaded {len(documents)} CIM fields into ChromaDB.")
+        logger.info(f"✅ Loaded {len(documents)} CIM fields into ChromaDB.")
 
     def get_cim_mapping(self, extracted_field_name, context=""):
-        """
-        Queries the Vector DB to find the closest Splunk CIM standard field.
-        """
         query_text = f"Find the Splunk CIM mapping for an extracted field named '{extracted_field_name}'. Context: {context}"
         
+        # Include distances in the result
         results = self.collection.query(
             query_texts=[query_text],
             n_results=1
         )
         
+        # Check if we got results AND if the distance is below a strict threshold (e.g., 1.0)
         if results['metadatas'] and len(results['metadatas'][0]) > 0:
-            best_match = results['metadatas'][0][0]
-            return best_match
+            distance = results['distances'][0][0]
+            
+            if distance < 1.2:  # Threshold tuning: adjust this if it's too strict/loose
+                best_match = results['metadatas'][0][0]
+                logger.info(f"RAG Match: '{extracted_field_name}' -> '{best_match['cim_field']}' (Distance: {distance:.2f})")
+                return best_match
+            else:
+                logger.info(f"RAG Ignored: '{extracted_field_name}' (No confident CIM match. Distance: {distance:.2f})")
+                
         return None
