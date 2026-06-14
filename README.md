@@ -47,3 +47,5 @@ flowchart TB
     class UI,State ui;
     class Agent,RAG ai;
     class REST,MCP,SplunkProd splunk;
+
+For more comprehensive architectural details, see [Talon Architecture](https://godmodevegeta.github.io/splunk-talon/)
